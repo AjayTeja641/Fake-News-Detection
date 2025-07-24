@@ -6,81 +6,83 @@ import numpy as np
 model = joblib.load("fake_news_model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
 
-# ---------- Custom Styles ----------
+# ---------- Custom CSS ----------
 custom_css = """
 <style>
-/* Background animation using gradient */
+/* Animated gradient background */
 [data-testid="stAppViewContainer"] {
-    background: linear-gradient(-45deg, #1e1e1e, #2e2e2e, #3e3e3e, #1e1e1e);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    background: linear-gradient(-45deg, #1f1c2c, #928DAB, #434343, #000000);
+    background-size: 600% 600%;
+    animation: gradient 16s ease infinite;
     color: white;
 }
 
-@keyframes gradientBG {
+@keyframes gradient {
     0% {background-position: 0% 50%;}
     50% {background-position: 100% 50%;}
     100% {background-position: 0% 50%;}
 }
 
-[data-testid="stSidebar"] {
-    background-color: #111;
-    color: white;
+/* Style for title and text */
+h1, h2, h3, h4, h5, h6, .stTextInput>div>label, .stTextArea>div>label {
+    color: #f1f1f1 !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #f8f8f8 !important;
-}
-
-.stButton>button {
-    background-color: #ff4b4b;
+/* Custom gradient button */
+div.stButton > button {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
     color: white;
-    border-radius: 8px;
+    padding: 0.6em 2em;
     font-weight: bold;
+    border: none;
+    border-radius: 30px;
+    transition: 0.3s ease-in-out;
 }
 
-footer, header {visibility: hidden;}
+div.stButton > button:hover {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: black;
+    transform: scale(1.05);
+}
+
+/* Sidebar customization */
+[data-testid="stSidebar"] {
+    background-color: #0f0f0f;
+    color: white;
+}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------- Sidebar ----------
+st.sidebar.title("🧠 Fake News Scanner")
+st.sidebar.markdown("Created by **Ajay Teja K.**")
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Fake_news.svg/512px-Fake_news.svg.png", width=150)
-st.sidebar.title("🔧 Settings")
-dark_mode = st.sidebar.toggle("🌙 Enable Dark Mode", value=True)
-st.sidebar.markdown("Developed by **Ajay Teja K.**")
-st.sidebar.markdown("---")
-st.sidebar.markdown("📘 [Learn about Fake News](https://en.wikipedia.org/wiki/Fake_news)")
+st.sidebar.markdown("🔗 [About Fake News](https://en.wikipedia.org/wiki/Fake_news)")
 
-# ---------- Page Title ----------
-st.title("📰 AI-Powered Fake News Detector")
-st.markdown(
-    "<p style='font-size:18px;'>Enter a news article to check whether it's real or fake using Machine Learning.</p>",
-    unsafe_allow_html=True
-)
+# ---------- Title ----------
+st.title("📰 Fake News Detection with AI")
 
-# ---------- Text Input ----------
-input_text = st.text_area("✍️ Paste or type the news content here:", height=200)
+st.markdown("<p style='font-size:18px;'>Enter a news article to detect whether it's **REAL** or **FAKE** using a trained ML model.</p>", unsafe_allow_html=True)
 
-# ---------- Prediction Logic ----------
+# ---------- Input ----------
+user_input = st.text_area("✍️ Paste or type the news content below:")
+
+# ---------- Prediction ----------
 if st.button("🔎 Predict Now"):
-    if input_text.strip() == "":
-        st.warning("⚠️ Please enter some news content.")
+    if user_input.strip() == "":
+        st.warning("⚠️ Please enter the news content.")
     else:
-        transformed_text = vectorizer.transform([input_text])
-        prediction = model.predict(transformed_text)[0]
-        proba = model.predict_proba(transformed_text)[0]
+        transformed = vectorizer.transform([user_input])
+        prediction = model.predict(transformed)[0]
+        proba = model.predict_proba(transformed)[0]
 
-        st.subheader("📊 Prediction Result")
+        st.subheader("📊 Result")
         if prediction == 1:
-            st.error("🚨 The news is likely **FAKE**.")
+            st.error("🚨 This news is likely **FAKE**.")
         else:
-            st.success("✅ The news appears to be **REAL**.")
+            st.success("✅ This news appears to be **REAL**.")
 
         # Confidence score
         confidence = round(np.max(proba) * 100, 2)
         st.info(f"🔍 Confidence Score: **{confidence}%**")
-
-        # Pie Chart (optional)
-        st.markdown("### 📈 Probability Breakdown")
-        st.progress(confidence / 100)
